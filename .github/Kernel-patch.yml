@@ -1,0 +1,44 @@
+name: Patch and Build Kernel
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential fakeroot flex bison gperf \
+                                 bzip2 zlib1g-dev libncurses5-dev libglib2.0-dev \
+                                 unzip texinfo libssl-dev libelf-dev
+
+      - name: Clone kernel source
+        run: |
+          git clone <kernel_source_url> <kernel_source_dir>
+
+      - name: Apply patch
+        run: |
+          cd <kernel_source_dir>
+          patch -p1 -i ../<path_to_patch_file>
+
+      - name: Configure kernel
+        run: |
+          cd <kernel_source_dir>
+          make menuconfig # or make defconfig
+
+      - name: Build kernel
+        run: |
+          cd <kernel_source_dir>
+          make
+
+      - name: Install kernel
+        run: |
+          sudo make install
+          # ... other installation steps
